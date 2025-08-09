@@ -1,8 +1,8 @@
 <!DOCTYPE html> 
 <html lang="fa" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>محاسبه اقساط</title>
     <style>
         @font-face {
@@ -12,7 +12,6 @@
             font-style: normal;
             font-display: swap;
         }
-
         body {
             font-family: 'Vazirmatn', sans-serif;
             background-color: #f0f4f8;
@@ -25,7 +24,6 @@
             direction: rtl;
             text-align: right;
         }
-
         .container {
             background-color: #ffffff;
             padding: 30px 40px;
@@ -35,29 +33,24 @@
             max-width: 450px;
             text-align: center;
         }
-
         h1 {
             color: #1e3a8a;
             font-size: 1.8rem;
             margin-bottom: 20px;
         }
-
         .input-group {
             margin-bottom: 20px;
             text-align: right;
         }
-
         .input-group label {
             display: block;
             margin-bottom: 8px;
             font-weight: 500;
             color: #1e3a8a;
         }
-
         .input-container {
             position: relative;
         }
-        
         .input-container input[type="text"] {
             width: 100%;
             padding: 12px;
@@ -67,14 +60,13 @@
             font-size: 1rem;
             transition: border-color 0.2s, box-shadow 0.2s;
             text-align: left;
+            direction: ltr;
         }
-        
         .input-container input[type="text"]:focus {
             outline: none;
             border-color: #3b82f6;
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
         }
-
         .input-container .number-controls {
             position: absolute;
             top: 50%;
@@ -83,7 +75,6 @@
             display: flex;
             gap: 5px;
         }
-        
         .input-container .number-controls button {
             background-color: #f0f4f8;
             border: 1px solid #d4d8de;
@@ -95,24 +86,21 @@
             font-size: 1rem;
             transition: background-color 0.2s;
         }
-        
         .input-container .number-controls button:hover {
             background-color: #e2e8f0;
         }
-
         .number-in-words {
             font-size: 0.9rem;
             color: #64748b;
             margin-top: 5px;
+            min-height: 24px;
         }
-
         .button-group {
             display: flex;
             justify-content: space-between;
             margin-bottom: 25px;
             gap: 10px;
         }
-
         .button-group button,
         .button-group input {
             flex-grow: 1;
@@ -124,18 +112,21 @@
             cursor: pointer;
             font-size: 1rem;
             transition: background-color 0.2s, color 0.2s, transform 0.1s;
+            direction: ltr;
         }
-
-        .button-group button:hover {
+        .button-group button:hover:not(:disabled) {
             background-color: #e2e8f0;
         }
-        
         .button-group button.active {
             background-color: #3b82f6;
             color: #ffffff;
             border-color: #3b82f6;
         }
-
+        .button-group input:disabled {
+            background-color: #e0e0e0;
+            cursor: not-allowed;
+            color: #a0a0a0;
+        }
         .results {
             margin-top: 30px;
             padding: 20px;
@@ -145,34 +136,26 @@
             text-align: right;
             line-height: 1.8;
             font-size: 1.1rem;
+            min-height: 70px;
         }
-
         .results p {
-            margin: 0;
+            margin: 0 0 10px 0;
             color: #1e3a8a;
             font-weight: 500;
         }
-
         .results span {
             font-weight: bold;
             color: #3b82f6;
             margin-right: 5px;
         }
-
-        #downPaymentAmount {
-            text-align: right;
-        }
     </style>
 </head>
 <body>
-
     <div class="container">
         <h1>محاسبه اقساط</h1>
-
         <div class="input-group">
             <label for="totalAmount">مبلغ اصلی (تومان):</label>
             <div class="input-container">
-                <!-- inputmode numeric helps mobile keyboards -->
                 <input type="text" id="totalAmount" placeholder="مبلغ اصلی را وارد کنید" inputmode="numeric" autocomplete="off" />
                 <div class="number-controls">
                     <button type="button" id="inc50k">+</button>
@@ -181,33 +164,29 @@
             </div>
             <div id="totalAmountInWords" class="number-in-words"></div>
         </div>
-
         <div class="input-group">
             <label>انتخاب پیش‌پرداخت:</label>
             <div class="button-group" id="down-payment-buttons">
-                <button data-numerator="1" data-denominator="2" onclick="setDownPaymentFraction(this)">۱/۲</button>
-                <button data-numerator="1" data-denominator="3" onclick="setDownPaymentFraction(this)">۱/۳</button>
-                <input type="text" id="downPaymentAmount" placeholder="مبلغ دلخواه" oninput="handleDownPaymentInput()" />
+                <button type="button" data-numerator="1" data-denominator="2">۱/۲</button>
+                <button type="button" data-numerator="1" data-denominator="3">۱/۳</button>
+                <input type="text" id="downPaymentAmount" placeholder="مبلغ دلخواه" autocomplete="off" />
             </div>
         </div>
-        
         <div class="input-group">
             <label>تعداد اقساط:</label>
             <div class="button-group" id="installments-buttons">
-                <button data-count="2" onclick="calculateInstallment(this)">۲ قسط</button>
-                <button data-count="3" onclick="calculateInstallment(this)">۳ قسط</button>
-                <button data-count="4" onclick="calculateInstallment(this)">۴ قسط</button>
-                <button data-count="5" onclick="calculateInstallment(this)">۵ قسط</button>
-                <button data-count="6" onclick="calculateInstallment(this)">۶ قسط</button>
+                <button type="button" data-count="2">۲ قسط</button>
+                <button type="button" data-count="3">۳ قسط</button>
+                <button type="button" data-count="4">۴ قسط</button>
+                <button type="button" data-count="5">۵ قسط</button>
+                <button type="button" data-count="6">۶ قسط</button>
             </div>
         </div>
-
         <div class="results">
             <p id="downPaymentResult">پیش‌پرداخت: <span>۰</span> تومان</p>
             <p id="installmentResult">مبلغ هر قسط: <span>۰</span> تومان</p>
         </div>
     </div>
-
     <script>
         // === utility for Persian/Arabic digit conversion ===
         function toLatinDigit(ch) {
@@ -221,7 +200,7 @@
             return Array.from(s).map(toLatinDigit).filter(c => /[0-9]/.test(c)).join('');
         }
 
-        // === number to Persian words (kept from your original, minor tweak) ===
+        // === number to Persian words (basic) ===
         const numberToWords = (num) => {
             const units = ['', 'هزار', 'میلیون', 'میلیارد'];
             const toWord = (n) => {
@@ -271,31 +250,28 @@
         const decBtn = document.getElementById('dec50k');
 
         // === state ===
-        // core = رشته‌ای از ارقام که کاربر وارد می‌کند.
-        // مقدار واقعی = Number(core) * 10000
+        // core = رشته‌ای از ارقام که کاربر وارد می‌کند (مثلا 120)
+        // مقدار واقعی = Number(core) * 10000 (1200000)
         let core = ''; 
-        let lastMapping = []; // نگهداری نگاشت از ایندکس‌های fullDigits به نمایش فرمت‌شده
+        let lastMapping = []; // نگاشت موقعیت کاراکترهای core به نمایش فرمت شده
         let selectedDownPaymentFraction = null;
         let selectedInstallmentCount = null;
 
         // === formatting helpers ===
-        // فرمت کردن عدد (برای استفاده روی اعداد معمولی)
         function formatNumber(num) {
-            // num ممکنه عدد یا رشته باشد
             if (num === '' || num === null || typeof num === 'undefined') return '';
             const s = String(num);
-            // اگر رشته‌ای داده شد که حاوی غیر ارقام و ویرگول است، سعی می‌کنیم عدد بسازیم
             const n = parseInt(s.toString().replace(/,/g, ''), 10);
             if (isNaN(n)) return '';
             return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
 
-        // فرمت مخصوص ما: core + '0000' -> تبدیل به رشته با کاما و نقشه‌گذاری ایندکس‌ها
+        // فرمت کردن core + 0000 به رشته با کاما و نگاشت موقعیت کاراکترها
         function formatFromCore(coreStr) {
             if (!coreStr || coreStr.length === 0) {
                 return { formatted: '', mapping: [] };
             }
-            const fullDigits = coreStr + '0000'; // رشته از ارقام (بدون کاما)
+            const fullDigits = coreStr + '0000';
             const rev = [];
             const mapRev = new Array(fullDigits.length);
             let digitsSinceComma = 0;
@@ -326,19 +302,17 @@
             }
         }
 
+        // کنترل مکان نما: فقط می‌گذاریم مکان نما بعد از آخرین رقم core باشد، نه داخل ۴ صفر انتهایی
         function setCaretToEnd() {
-            // مکانی که می‌خواهیم: بعد از آخرین رقم core در رشته فرمت‌شده
             if (!lastMapping || lastMapping.length === 0 || core.length === 0) {
                 totalAmountInput.setSelectionRange(0, 0);
                 return;
             }
-            const lastCoreIndexInFull = core.length - 1; // ایندکس آخرین رقم در fullDigits (core + 0000)
-            const caretPos = lastMapping[lastCoreIndexInFull] + 1; // بعد از آن حرف
+            const lastCoreIndexInFull = core.length - 1;
+            const caretPos = lastMapping[lastCoreIndexInFull] + 1;
             try {
                 totalAmountInput.setSelectionRange(caretPos, caretPos);
-            } catch (e) {
-                // ignore (بعضی مرورگرها ممکنه خطا بدهند)
-            }
+            } catch {}
         }
 
         function updateDisplay() {
@@ -349,17 +323,16 @@
             setCaretToEnd();
         }
 
-        // === keyboard / input behavior for totalAmount ===
+        // --- ورودی عدد اصلی ---
+
         function isDigitKey(key) {
             const k = toLatinDigit(key);
             return /^[0-9]$/.test(k);
         }
 
         totalAmountInput.addEventListener('keydown', function(e) {
-            // اجازه‌دهنده‌ها: backspace, delete, arrows, home/end, tab, ctrl/meta combos
-            if (e.ctrlKey || e.metaKey || e.altKey) {
-                return; // اجازه می‌دهیم (کپی/پیست/...)
-            }
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+
             const k = e.key;
 
             if (k === 'Backspace') {
@@ -371,7 +344,6 @@
                 }
                 return;
             }
-
             if (k === 'Delete') {
                 e.preventDefault();
                 if (core.length > 0) {
@@ -381,35 +353,25 @@
                 }
                 return;
             }
-
             if (isDigitKey(k)) {
                 e.preventDefault();
                 const digit = toLatinDigit(k);
-                // جلوگیری از صفر ابتدایی
-                if (core.length === 0 && digit === '0') {
-                    return;
-                }
+                if (core.length === 0 && digit === '0') return; // جلوگیری از صفر شروع
+
                 core += digit;
                 updateDisplay();
                 calculate();
                 return;
             }
-
-            // کلیدهای حرکتی را مجاز می‌دانیم ولی پس از چند میلی‌ثانیه مکان‌نما را به انتها برمی‌گردانیم
             if (['ArrowLeft','ArrowRight','Home','End','Tab'].includes(k)) {
-                // اجازه‌ده؛ ولی caret را بعداً تنظیم می‌کنیم
                 setTimeout(setCaretToEnd, 0);
                 return;
             }
-
-            // سایر کلیدها را مسدود می‌کنیم (مثل space یا حروف)
             e.preventDefault();
         });
 
-        // input event: برای مواقعی که mobile IME یا paste باعث تغییر value می‌شود.
+        // روی event input برای موبایل و IME
         totalAmountInput.addEventListener('input', function(e) {
-            // اگر از طریق رویدادهای بالا تغییر دادیم، همان را نگه می‌داریم.
-            // اما اگر به هر دلیلی value تغییری پیدا کرده (مثلاً IME)، آن را پاکسازی کرده و core را بازسازی می‌کنیم.
             const digits = extractDigitsOnly(totalAmountInput.value);
             if (!digits || digits.length === 0) {
                 core = '';
@@ -417,7 +379,6 @@
                 calculate();
                 return;
             }
-            // تبدیل fullDigits به core = floor(full / 10000)
             const fullNum = BigInt(digits);
             const coreNum = fullNum / 10000n;
             core = String(coreNum === 0n ? '' : coreNum);
@@ -425,13 +386,11 @@
             calculate();
         });
 
-        // paste: فقط ارقام را می‌پذیریم و core را بر اساس آن تنظیم می‌کنیم
         totalAmountInput.addEventListener('paste', function(e) {
             e.preventDefault();
             const text = (e.clipboardData || window.clipboardData).getData('text') || '';
             const digits = extractDigitsOnly(text);
             if (!digits) return;
-            // core = floor(digits / 10000)
             const fullNum = BigInt(digits);
             const coreNum = fullNum / 10000n;
             core = String(coreNum === 0n ? '' : coreNum);
@@ -439,7 +398,6 @@
             calculate();
         });
 
-        // کلیک یا فوکوس: caret را به انتها ببریم (اجازه ندهیم بین چهار صفر قرار گیرد)
         totalAmountInput.addEventListener('focus', function() {
             setTimeout(setCaretToEnd, 0);
         });
@@ -447,84 +405,149 @@
             setTimeout(setCaretToEnd, 0);
         });
 
-        // === change amount by buttons (+/- 50k) ===
+        // افزایش/کاهش 50 هزار تومان
         function changeTotalAmount(amount) {
-            // current full
             const currentFull = core && core.length ? Number(core) * 10000 : 0;
             let newFull = currentFull + amount;
             if (newFull < 0) newFull = 0;
             const newCore = Math.floor(newFull / 10000);
-            core = newCore > 0 ? String(newCore) : '';
+            core = String(newCore === 0 ? '' : newCore);
             updateDisplay();
             calculate();
         }
         incBtn.addEventListener('click', () => changeTotalAmount(50000));
         decBtn.addEventListener('click', () => changeTotalAmount(-50000));
 
-        // === down payment input handling (unchanged اما امن‌تر) ===
-        function unformatNumber(text) {
-            const num = parseFloat(String(text || '').replace(/,/g, ''));
-            return isNaN(num) ? 0 : num;
+        // --- قابلیت جدید: محاسبه هوشمند پیش‌پرداخت و اقساط ---
+
+        // رند کردن مبلغ به نزدیک‌ترین مضرب 10000 بالاتر یا مساوی مبلغ ورودی
+        function roundUpToTenThousand(num) {
+            return Math.ceil(num / 10000) * 10000;
         }
 
-        function handleDownPaymentInput() {
-            downPaymentButtons.forEach(btn => btn.classList.remove('active'));
-            selectedDownPaymentFraction = null;
+        // بررسی بخش پذیری مبلغ قسط بر 100000
+        function isInstallmentDivisibleBy100k(amount) {
+            return amount % 100000 === 0;
+        }
 
-            const value = downPaymentAmountInput.value;
-            const digits = extractDigitsOnly(value);
-            const number = unformatNumber(digits);
-            if (!isNaN(number) && number > 0) {
-                downPaymentAmountInput.value = formatNumber(number);
+        // محاسبه هوشمند پیش‌پرداخت و اقساط
+        function calculateSmartDownPayment(totalAmount, numerator, denominator, installmentCount) {
+            if (!totalAmount || !numerator || !denominator || !installmentCount) {
+                return { downPayment: 0, installment: 0 };
+            }
+
+            // مبلغ اولیه پیش‌پرداخت بر اساس کسر
+            let baseDownPayment = totalAmount * numerator / denominator;
+
+            // از baseDownPayment شروع می‌کنیم و 10000 به 10000 بالا می‌بریم تا قسط بخش‌پذیر بشود
+            let downPayment = roundUpToTenThousand(baseDownPayment);
+
+            // حلقه برای پیدا کردن downPayment مناسب
+            for (let i = 0; i < 1000; i++) { // حداکثر ۱۰۰۰ بار تلاش
+                let installmentAmount = (totalAmount - downPayment) / installmentCount;
+
+                if (installmentAmount > 0 && isInstallmentDivisibleBy100k(installmentAmount)) {
+                    // اگر قسط بخش‌پذیر بود
+                    return { downPayment, installment: installmentAmount };
+                }
+                downPayment += 10000; // افزایش پیش‌پرداخت ۱۰ هزار تومان
+            }
+
+            // اگر نتوانست پیدا کند، حداقل پیش‌پرداخت را برمی‌گرداند
+            let installmentAmount = (totalAmount - downPayment) / installmentCount;
+            return { downPayment, installment: installmentAmount };
+        }
+
+        // --- مدیریت انتخاب پیش‌پرداخت ---
+
+        function handleDownPaymentInput() {
+            const val = extractDigitsOnly(downPaymentAmountInput.value);
+            if (val && val.length > 0) {
+                // غیر فعال کردن دکمه‌های کسر
+                downPaymentButtons.forEach(btn => btn.disabled = true);
+                selectedDownPaymentFraction = null;
+                downPaymentButtons.forEach(b => b.classList.remove('active'));
             } else {
-                downPaymentAmountInput.value = '';
+                // فعال کردن دکمه‌ها
+                downPaymentButtons.forEach(btn => btn.disabled = false);
             }
             calculate();
         }
 
-        function setDownPaymentFraction(button) {
-            downPaymentButtons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-            
+        function setDownPaymentFraction(btn) {
+            if (btn.disabled) return;
+            downPaymentButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
             selectedDownPaymentFraction = {
-                numerator: parseInt(button.dataset.numerator),
-                denominator: parseInt(button.dataset.denominator)
+                numerator: parseInt(btn.getAttribute('data-numerator')),
+                denominator: parseInt(btn.getAttribute('data-denominator'))
             };
+
             downPaymentAmountInput.value = '';
+            downPaymentAmountInput.disabled = false;
+
             calculate();
         }
 
-        function calculateInstallment(button) {
-            installmentButtons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-            selectedInstallmentCount = parseInt(button.dataset.count);
+        downPaymentButtons.forEach(btn => {
+            btn.addEventListener('click', () => setDownPaymentFraction(btn));
+        });
+        downPaymentAmountInput.addEventListener('input', handleDownPaymentInput);
+
+        // --- مدیریت انتخاب تعداد اقساط ---
+
+        function setInstallmentCount(btn) {
+            installmentButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedInstallmentCount = parseInt(btn.getAttribute('data-count'));
             calculate();
         }
+        installmentButtons.forEach(btn => {
+            btn.addEventListener('click', () => setInstallmentCount(btn));
+        });
+
+        // مقدار پیش‌فرض
+        if (installmentButtons.length > 0) {
+            setInstallmentCount(installmentButtons[0]);
+        }
+
+        // --- محاسبه نهایی ---
 
         function calculate() {
-            const totalAmount = core && core.length ? Number(core) * 10000 : 0;
+            const totalAmountRaw = extractDigitsOnly(totalAmountInput.value);
+            if (!totalAmountRaw) {
+                downPaymentResultSpan.textContent = '۰';
+                installmentResultSpan.textContent = '۰';
+                return;
+            }
+            const totalAmount = Number(totalAmountRaw);
+
+            if (!selectedInstallmentCount) {
+                downPaymentResultSpan.textContent = '۰';
+                installmentResultSpan.textContent = '۰';
+                return;
+            }
+
             let downPayment = 0;
             let installment = 0;
 
             if (selectedDownPaymentFraction) {
-                downPayment = Math.round(totalAmount * (selectedDownPaymentFraction.numerator / selectedDownPaymentFraction.denominator));
-                downPaymentAmountInput.value = formatNumber(downPayment);
+                const res = calculateSmartDownPayment(totalAmount, selectedDownPaymentFraction.numerator, selectedDownPaymentFraction.denominator, selectedInstallmentCount);
+                downPayment = res.downPayment;
+                installment = res.installment;
+                downPaymentAmountInput.value = '';
+                downPaymentButtons.forEach(btn => btn.disabled = false);
             } else {
-                downPayment = unformatNumber(downPaymentAmountInput.value);
+                const val = extractDigitsOnly(downPaymentAmountInput.value);
+                downPayment = val ? Number(val) : 0;
+                installment = (totalAmount - downPayment) / selectedInstallmentCount;
             }
 
-            if (totalAmount > 0 && selectedInstallmentCount > 0 && totalAmount > downPayment) {
-                const remainingAmount = totalAmount - downPayment;
-                installment = remainingAmount / selectedInstallmentCount;
-            }
-
-            downPaymentResultSpan.innerText = formatNumber(Math.round(downPayment));
-            installmentResultSpan.innerText = formatNumber(Math.round(installment));
+            downPaymentResultSpan.textContent = formatNumber(Math.floor(downPayment));
+            installmentResultSpan.textContent = formatNumber(Math.floor(installment));
         }
 
-        // نمایش اولیه
-        updateDisplay();
-        calculate();
     </script>
 </body>
 </html>
