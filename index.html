@@ -169,8 +169,18 @@
             <div class="button-group" id="down-payment-buttons">
                 <button type="button" data-numerator="1" data-denominator="2">۱/۲</button>
                 <button type="button" data-numerator="1" data-denominator="3">۱/۳</button>
-                <input type="text" id="downPaymentAmount" placeholder="مبلغ دلخواه" autocomplete="off" />
             </div>
+        </div>
+        <div class="input-group">
+            <label for="downPaymentAmount">مبلغ پیش‌پرداخت (تومان):</label>
+            <div class="input-container">
+                <input type="text" id="downPaymentAmount" placeholder="مبلغ پیش‌پرداخت را وارد کنید" inputmode="numeric" autocomplete="off" />
+                <div class="number-controls">
+                    <button type="button" id="inc50kDown">+</button>
+                    <button type="button" id="dec50kDown">-</button>
+                </div>
+            </div>
+            <div id="downPaymentAmountInWords" class="number-in-words"></div>
         </div>
         <div class="input-group">
             <label>تعداد اقساط:</label>
@@ -246,14 +256,19 @@
         const downPaymentResultSpan = document.getElementById('downPaymentResult').querySelector('span');
         const installmentResultSpan = document.getElementById('installmentResult').querySelector('span');
         const totalAmountInWordsDiv = document.getElementById('totalAmountInWords');
+        const downPaymentAmountInWordsDiv = document.getElementById('downPaymentAmountInWords');
         const incBtn = document.getElementById('inc50k');
         const decBtn = document.getElementById('dec50k');
+        const incDownBtn = document.getElementById('inc50kDown');
+        const decDownBtn = document.getElementById('dec50kDown');
 
         // === state ===
         // core = رشته‌ای از ارقام که کاربر وارد می‌کند (مثلا 120)
         // مقدار واقعی = Number(core) * 10000 (1200000)
         let core = ''; 
         let lastMapping = []; // نگاشت موقعیت کاراکترهای core به نمایش فرمت شده
+        let downPaymentCore = ''; 
+        let downPaymentLastMapping = []; // نگاشت موقعیت کاراکترهای downPaymentCore به نمایش فرمت شده
         let selectedDownPaymentFraction = null;
         let selectedInstallmentCount = null;
 
@@ -302,6 +317,15 @@
             }
         }
 
+        function updateDownPaymentAmountInWords() {
+            const full = downPaymentCore && downPaymentCore.length ? Number(downPaymentCore) * 10000 : 0;
+            if (full > 0) {
+                downPaymentAmountInWordsDiv.innerText = `${numberToWords(full)} تومان`;
+            } else {
+                downPaymentAmountInWordsDiv.innerText = '';
+            }
+        }
+
         // کنترل مکان نما: فقط می‌گذاریم مکان نما بعد از آخرین رقم core باشد، نه داخل ۴ صفر انتهایی
         function setCaretToEnd() {
             if (!lastMapping || lastMapping.length === 0 || core.length === 0) {
@@ -315,12 +339,32 @@
             } catch {}
         }
 
+        function setDownPaymentCaretToEnd() {
+            if (!downPaymentLastMapping || downPaymentLastMapping.length === 0 || downPaymentCore.length === 0) {
+                downPaymentAmountInput.setSelectionRange(0, 0);
+                return;
+            }
+            const lastCoreIndexInFull = downPaymentCore.length - 1;
+            const caretPos = downPaymentLastMapping[lastCoreIndexInFull] + 1;
+            try {
+                downPaymentAmountInput.setSelectionRange(caretPos, caretPos);
+            } catch {}
+        }
+
         function updateDisplay() {
             const { formatted, mapping } = formatFromCore(core);
             lastMapping = mapping;
             totalAmountInput.value = formatted;
             updateAmountInWords();
             setCaretToEnd();
+        }
+
+        function updateDownPaymentDisplay() {
+            const { formatted, mapping } = formatFromCore(downPaymentCore);
+            downPaymentLastMapping = mapping;
+            downPaymentAmountInput.value = formatted;
+            updateDownPaymentAmountInWords();
+            setDownPaymentCaretToEnd();
         }
 
         // --- ورودی عدد اصلی ---
@@ -418,6 +462,101 @@
         incBtn.addEventListener('click', () => changeTotalAmount(50000));
         decBtn.addEventListener('click', () => changeTotalAmount(-50000));
 
+        // --- ورودی مبلغ پیش‌پرداخت ---
+
+        downPaymentAmountInput.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+            const k = e.key;
+
+            if (k === 'Backspace') {
+                e.preventDefault();
+                if (downPaymentCore.length > 0) {
+                    downPaymentCore = downPaymentCore.slice(0, -1);
+                    updateDownPaymentDisplay();
+                    handleDownPaymentInput();
+                    calculate();
+                }
+                return;
+            }
+            if (k === 'Delete') {
+                e.preventDefault();
+                if (downPaymentCore.length > 0) {
+                    downPaymentCore = downPaymentCore.slice(0, -1);
+                    updateDownPaymentDisplay();
+                    handleDownPaymentInput();
+                    calculate();
+                }
+                return;
+            }
+            if (isDigitKey(k)) {
+                e.preventDefault();
+                const digit = toLatinDigit(k);
+                if (downPaymentCore.length === 0 && digit === '0') return; // جلوگیری از صفر شروع
+
+                downPaymentCore += digit;
+                updateDownPaymentDisplay();
+                handleDownPaymentInput();
+                calculate();
+                return;
+            }
+            if (['ArrowLeft','ArrowRight','Home','End','Tab'].includes(k)) {
+                setTimeout(setDownPaymentCaretToEnd, 0);
+                return;
+            }
+            e.preventDefault();
+        });
+
+        // روی event input برای موبایل و IME
+        downPaymentAmountInput.addEventListener('input', function(e) {
+            const digits = extractDigitsOnly(downPaymentAmountInput.value);
+            if (!digits || digits.length === 0) {
+                downPaymentCore = '';
+                updateDownPaymentDisplay();
+                handleDownPaymentInput();
+                calculate();
+                return;
+            }
+            const fullNum = BigInt(digits);
+            const coreNum = fullNum / 10000n;
+            downPaymentCore = String(coreNum === 0n ? '' : coreNum);
+            updateDownPaymentDisplay();
+            handleDownPaymentInput();
+            calculate();
+        });
+
+        downPaymentAmountInput.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text') || '';
+            const digits = extractDigitsOnly(text);
+            if (!digits) return;
+            const fullNum = BigInt(digits);
+            const coreNum = fullNum / 10000n;
+            downPaymentCore = String(coreNum === 0n ? '' : coreNum);
+            updateDownPaymentDisplay();
+            calculate();
+        });
+
+        downPaymentAmountInput.addEventListener('focus', function() {
+            setTimeout(setDownPaymentCaretToEnd, 0);
+        });
+        downPaymentAmountInput.addEventListener('mousedown', function() {
+            setTimeout(setDownPaymentCaretToEnd, 0);
+        });
+
+        // افزایش/کاهش 50 هزار تومان برای پیش‌پرداخت
+        function changeDownPaymentAmount(amount) {
+            const currentFull = downPaymentCore && downPaymentCore.length ? Number(downPaymentCore) * 10000 : 0;
+            let newFull = currentFull + amount;
+            if (newFull < 0) newFull = 0;
+            const newCore = Math.floor(newFull / 10000);
+            downPaymentCore = String(newCore === 0 ? '' : newCore);
+            updateDownPaymentDisplay();
+            calculate();
+        }
+        incDownBtn.addEventListener('click', () => changeDownPaymentAmount(50000));
+        decDownBtn.addEventListener('click', () => changeDownPaymentAmount(-50000));
+
         // --- قابلیت جدید: محاسبه هوشمند پیش‌پرداخت و اقساط ---
 
         // رند کردن مبلغ به نزدیک‌ترین مضرب 10000 بالاتر یا مساوی مبلغ ورودی
@@ -461,8 +600,7 @@
         // --- مدیریت انتخاب پیش‌پرداخت ---
 
         function handleDownPaymentInput() {
-            const val = extractDigitsOnly(downPaymentAmountInput.value);
-            if (val && val.length > 0) {
+            if (downPaymentCore && downPaymentCore.length > 0) {
                 // غیر فعال کردن دکمه‌های کسر
                 downPaymentButtons.forEach(btn => btn.disabled = true);
                 selectedDownPaymentFraction = null;
@@ -484,7 +622,8 @@
                 denominator: parseInt(btn.getAttribute('data-denominator'))
             };
 
-            downPaymentAmountInput.value = '';
+            downPaymentCore = '';
+            updateDownPaymentDisplay();
             downPaymentAmountInput.disabled = false;
 
             calculate();
@@ -493,7 +632,7 @@
         downPaymentButtons.forEach(btn => {
             btn.addEventListener('click', () => setDownPaymentFraction(btn));
         });
-        downPaymentAmountInput.addEventListener('input', handleDownPaymentInput);
+        // Event listener for down payment input changes is handled in the keydown and input events above
 
         // --- مدیریت انتخاب تعداد اقساط ---
 
@@ -536,11 +675,11 @@
                 const res = calculateSmartDownPayment(totalAmount, selectedDownPaymentFraction.numerator, selectedDownPaymentFraction.denominator, selectedInstallmentCount);
                 downPayment = res.downPayment;
                 installment = res.installment;
-                downPaymentAmountInput.value = '';
+                downPaymentCore = '';
+                updateDownPaymentDisplay();
                 downPaymentButtons.forEach(btn => btn.disabled = false);
             } else {
-                const val = extractDigitsOnly(downPaymentAmountInput.value);
-                downPayment = val ? Number(val) : 0;
+                downPayment = downPaymentCore && downPaymentCore.length ? Number(downPaymentCore) * 10000 : 0;
                 installment = (totalAmount - downPayment) / selectedInstallmentCount;
             }
 
