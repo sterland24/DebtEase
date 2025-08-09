@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محاسبه اقساط</title>
+    <style>
+        @font-face {
+            font-family: 'Vazirmatn';
+            src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.0.3/Vazirmatn-Variable.woff2') format('woff2');
+            font-weight: 100 900;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #f0f4f8;
+            color: #334e68;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            direction: rtl;
+            text-align: right;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #1e3a8a;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: right;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #1e3a8a;
+        }
+
+        .input-container {
+            position: relative;
+        }
+        
+        .input-container input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #c8d2dc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            text-align: left;
+        }
+        
+        .input-container input[type="text"]:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .input-container .number-controls {
+            position: absolute;
+            top: 50%;
+            right: 8px;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 5px;
+        }
+        
+        .input-container .number-controls button {
+            background-color: #f0f4f8;
+            border: 1px solid #d4d8de;
+            color: #1e3a8a;
+            width: 25px;
+            height: 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+        
+        .input-container .number-controls button:hover {
+            background-color: #e2e8f0;
+        }
+
+        .number-in-words {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-top: 5px;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            gap: 10px;
+        }
+
+        .button-group button,
+        .button-group input {
+            flex-grow: 1;
+            padding: 12px;
+            background-color: #f0f4f8;
+            color: #1e3a8a;
+            border: 1px solid #d4d8de;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s, color 0.2s, transform 0.1s;
+        }
+
+        .button-group button:hover {
+            background-color: #e2e8f0;
+        }
+        
+        .button-group button.active {
+            background-color: #3b82f6;
+            color: #ffffff;
+            border-color: #3b82f6;
+        }
+
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e3f2fd;
+            border-radius: 8px;
+            border: 1px solid #bbdefb;
+            text-align: right;
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+
+        .results p {
+            margin: 0;
+            color: #1e3a8a;
+            font-weight: 500;
+        }
+
+        .results span {
+            font-weight: bold;
+            color: #3b82f6;
+            margin-right: 5px;
+        }
+
+        #downPaymentAmount {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>محاسبه اقساط</h1>
+
+        <div class="input-group">
+            <label for="totalAmount">مبلغ اصلی (تومان):</label>
+            <div class="input-container">
+                <input type="text" id="totalAmount" placeholder="مبلغ اصلی را وارد کنید" oninput="handleInput()">
+                <div class="number-controls">
+                    <button onclick="changeTotalAmount(50000)">+</button>
+                    <button onclick="changeTotalAmount(-50000)">-</button>
+                </div>
+            </div>
+            <div id="totalAmountInWords" class="number-in-words"></div>
+        </div>
+
+        <div class="input-group">
+            <label>انتخاب پیش‌پرداخت:</label>
+            <div class="button-group" id="down-payment-buttons">
+                <button data-numerator="1" data-denominator="2" onclick="setDownPaymentFraction(this)">۱/۲</button>
+                <button data-numerator="1" data-denominator="3" onclick="setDownPaymentFraction(this)">۱/۳</button>
+                <input type="text" id="downPaymentAmount" placeholder="مبلغ دلخواه" oninput="handleDownPaymentInput()">
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <label>تعداد اقساط:</label>
+            <div class="button-group" id="installments-buttons">
+                <button data-count="2" onclick="calculateInstallment(this)">۲ قسط</button>
+                <button data-count="3" onclick="calculateInstallment(this)">۳ قسط</button>
+                <button data-count="4" onclick="calculateInstallment(this)">۴ قسط</button>
+                <button data-count="5" onclick="calculateInstallment(this)">۵ قسط</button>
+                <button data-count="6" onclick="calculateInstallment(this)">۶ قسط</button>
+            </div>
+        </div>
+
+        <div class="results">
+            <p id="downPaymentResult">پیش‌پرداخت: <span>۰</span> تومان</p>
+            <p id="installmentResult">مبلغ هر قسط: <span>۰</span> تومان</p>
+        </div>
+    </div>
+
+    <script>
+        const numberToWords = (num) => {
+            const units = ['', 'هزار', 'میلیون', 'میلیارد'];
+            const toWord = (n) => {
+                const words = ['', 'یک', 'دو', 'سه', 'چهار', 'پنج', 'شش', 'هفت', 'هشت', 'نه',
+                                 'ده', 'یازده', 'دوازده', 'سیزده', 'چهارده', 'پانزده', 'شانزده', 'هفده', 'هجده', 'نوزده'];
+                const tens = ['', '', 'بیست', 'سی', 'چهل', 'پنجاه', 'شصت', 'هفتاد', 'هشتاد', 'نود'];
+                const hundreds = ['', 'صد', 'دویست', 'سیصد', 'چهارصد', 'پانصد', 'ششصد', 'هفتصد', 'هشتصد', 'نهصد'];
+                
+                let res = '';
+                if (n < 20) {
+                    res = words[n];
+                } else if (n < 100) {
+                    res = tens[Math.floor(n / 10)] + (n % 10 !== 0 ? ' و ' + words[n % 10] : '');
+                } else {
+                    res = hundreds[Math.floor(n / 100)] + (n % 100 !== 0 ? ' و ' + toWord(n % 100) : '');
+                }
+                return res;
+            };
+
+            if (num === 0) return 'صفر';
+            
+            let result = '';
+            let unitIndex = 0;
+            let currentNumber = num;
+
+            while (currentNumber > 0) {
+                const chunk = currentNumber % 1000;
+                if (chunk > 0) {
+                    const chunkWord = toWord(chunk);
+                    result = chunkWord + ' ' + units[unitIndex] + (result ? ' و ' + result : '');
+                }
+                currentNumber = Math.floor(currentNumber / 1000);
+                unitIndex++;
+            }
+            return result.trim();
+        };
+
+        const totalAmountInput = document.getElementById('totalAmount');
+        const downPaymentAmountInput = document.getElementById('downPaymentAmount');
+        const downPaymentButtons = document.querySelectorAll('#down-payment-buttons button');
+        const installmentButtons = document.querySelectorAll('#installments-buttons button');
+        const downPaymentResultSpan = document.getElementById('downPaymentResult').querySelector('span');
+        const installmentResultSpan = document.getElementById('installmentResult').querySelector('span');
+        const totalAmountInWordsDiv = document.getElementById('totalAmountInWords');
+
+        let selectedDownPaymentFraction = null;
+        let selectedInstallmentCount = null;
+
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+        
+        function unformatNumber(text) {
+            const num = parseFloat(text.replace(/,/g, ''));
+            return isNaN(num) ? 0 : num;
+        }
+
+        function updateAmountInWords() {
+            const amount = unformatNumber(totalAmountInput.value);
+            if (amount > 0) {
+                totalAmountInWordsDiv.innerText = `${numberToWords(amount)} تومان`;
+            } else {
+                totalAmountInWordsDiv.innerText = '';
+            }
+        }
+        
+        function handleInput() {
+            const value = totalAmountInput.value.replace(/,/g, '');
+            const number = unformatNumber(value);
+            if (!isNaN(number)) {
+                totalAmountInput.value = formatNumber(number);
+            }
+            updateAmountInWords();
+            calculate();
+        }
+
+        function handleDownPaymentInput() {
+            downPaymentButtons.forEach(btn => btn.classList.remove('active'));
+            selectedDownPaymentFraction = null;
+
+            const value = downPaymentAmountInput.value.replace(/,/g, '');
+            const number = unformatNumber(value);
+            if (!isNaN(number) && number > 0) {
+                downPaymentAmountInput.value = formatNumber(number);
+            } else {
+                downPaymentAmountInput.value = '';
+            }
+            calculate();
+        }
+        
+        function changeTotalAmount(amount) {
+            let currentAmount = unformatNumber(totalAmountInput.value);
+            currentAmount += amount;
+            if (currentAmount < 0) currentAmount = 0;
+            totalAmountInput.value = formatNumber(currentAmount);
+            handleInput();
+        }
+
+        function setDownPaymentFraction(button) {
+            downPaymentButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            
+            selectedDownPaymentFraction = {
+                numerator: parseInt(button.dataset.numerator),
+                denominator: parseInt(button.dataset.denominator)
+            };
+            downPaymentAmountInput.value = '';
+            calculate();
+        }
+
+        function calculateInstallment(button) {
+            installmentButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            selectedInstallmentCount = parseInt(button.dataset.count);
+            calculate();
+        }
+
+        function calculate() {
+            const totalAmount = unformatNumber(totalAmountInput.value);
+            let downPayment = 0;
+            let installment = 0;
+
+            if (selectedDownPaymentFraction) {
+                // پیش‌پرداخت بر اساس دکمه کسری انتخاب‌شده
+                downPayment = totalAmount * (selectedDownPaymentFraction.numerator / selectedDownPaymentFraction.denominator);
+                downPaymentAmountInput.value = formatNumber(Math.round(downPayment));
+            } else {
+                // پیش‌پرداخت بر اساس مبلغ دلخواه
+                downPayment = unformatNumber(downPaymentAmountInput.value);
+            }
+
+            if (totalAmount > 0 && selectedInstallmentCount > 0 && totalAmount > downPayment) {
+                const remainingAmount = totalAmount - downPayment;
+                installment = remainingAmount / selectedInstallmentCount;
+                
+                // در اینجا می‌توانید منطق رند کردن را اضافه کنید
+                // مثال: installment = Math.round(installment / 1000) * 1000;
+            }
+
+            downPaymentResultSpan.innerText = formatNumber(Math.round(downPayment));
+            installmentResultSpan.innerText = formatNumber(Math.round(installment));
+        }
+
+        // مقداردهی اولیه برای نمایش اولیه
+        calculate();
+    </script>
+</body>
+</html>
